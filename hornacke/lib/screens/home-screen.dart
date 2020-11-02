@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:hornacke/components/custom-appbar.dart';
 import 'package:hornacke/components/song-card.dart';
+import 'package:hornacke/models/song-model.dart';
 import 'package:hornacke/screens/search-screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -18,6 +19,8 @@ class _HomePageState extends State<HomePage> {
     final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
     return parsed.map<Song>((json) => Song.fromJson(json)).toList();
   }
+  // sedlacke - https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=sedlacka
+  // verbunky - https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=verbunk
 
   Future<List<Song>> fetchSongs() async {
     final response =
@@ -183,20 +186,4 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class Song {
-  final String title;
-  final String lyrics;
-  final String type;
-  final String video;
 
-  Song({this.title, this.lyrics, this.type, this.video});
-
-  factory Song.fromJson(Map<String, dynamic> json) {
-    return Song(
-      title: json['song_title'],
-      lyrics: json['lyrics'],
-      type: json['song_type'],
-      video: json['video'],
-    );
-  }
-}
