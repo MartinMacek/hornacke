@@ -10,22 +10,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        title: 'Horňácké',
-        theme: ThemeData(
-          primarySwatch: Colors.grey,
-          fontFamily: "Metropolis"
-        ),
-        home: Navigator(
-          pages: [
-            MaterialPage(key: ValueKey("HomePage"), child: HomePage()),
-          ],
-          onPopPage: (route, result) {
-            if (!route.didPop(result)) {
-              return false;
-            }
-
-            return true;
-          },
-        ));
+      title: 'Horňácké',
+      theme: ThemeData(primarySwatch: Colors.grey, fontFamily: "Metropolis"),
+      initialRoute: "/",
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => HomePage(),
+      },
+    );
   }
 }

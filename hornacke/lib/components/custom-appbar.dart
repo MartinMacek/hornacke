@@ -13,6 +13,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      brightness: Brightness.dark,
       title: Container(
         child: Padding(
           padding: const EdgeInsets.only(top: 22.0),
@@ -29,7 +30,7 @@ class CustomAppBar extends StatelessWidget with PreferredSizeWidget {
           ),
         ),
       ),
-      backgroundColor: Color(0xffb191919),
+      backgroundColor: Color(0xff191919),
     );
   }
 }

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:hornacke/components/custom-appbar.dart';
-import 'package:hornacke/components/song_card.dart';
+import 'package:hornacke/components/song-card.dart';
 import 'package:hornacke/screens/search-screen.dart';
 import 'package:http/http.dart' as http;
 
@@ -21,7 +21,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<List<Song>> fetchSongs() async {
     final response =
-        await http.get("http://hornacke.8u.cz/wp-json/wp/v2/songs");
+        await http.get("https://hornacke.8u.cz/wp-json/wp/v2/songs");
 
     if (response.statusCode == 200) {
       return parseSongs(response.body);
@@ -57,6 +57,9 @@ class _HomePageState extends State<HomePage> {
                       image: AssetImage("assets/images/mlyn.png"),
                       fit: BoxFit.cover,
                     ),
+                    border: Border.symmetric(
+                        horizontal:
+                            BorderSide(color: Color(0xff191919), width: 2)),
                   ),
                   height: 262,
                 ),
@@ -65,30 +68,33 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 41.0),
-                  child: OutlineButton(
-                      padding: const EdgeInsets.all(16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 24,
-                          ),
-                          Text("Vyhledat písničku"),
-                          Icon(Icons.search_outlined)
-                        ],
-                      ),
-                      textColor: Colors.white,
-                      borderSide: BorderSide(color: Colors.white, width: 1),
-                      onPressed: () => {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) {
-                                return SearchPage();
-                              }),
-                            )
-                          }),
+                  child: Hero(
+                    tag: "search",
+                    child: OutlineButton(
+                        padding: const EdgeInsets.all(16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: 24,
+                            ),
+                            Text("Vyhledat písničku"),
+                            Icon(Icons.search_outlined)
+                          ],
+                        ),
+                        textColor: Colors.white,
+                        borderSide: BorderSide(color: Colors.white, width: 1),
+                        onPressed: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) {
+                                  return SearchPage();
+                                }),
+                              )
+                            }),
+                  ),
                 ),
                 SizedBox(
                   height: 43,
@@ -139,10 +145,10 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 17,
                 ),
-                Column(
+                /*Column(
                   children: List.generate(
                       0, (i) => SongCard("The title", "lyrics", "sedlacka")),
-                ),
+                ),*/
                 FutureBuilder(
                   future: futureSongs,
                   builder: (context, snapshot) {
