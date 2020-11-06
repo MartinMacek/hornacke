@@ -25,6 +25,16 @@ class DetailScreen extends StatelessWidget {
   final String video;
   final String sound;
 
+  String translateType(String _type) {
+    if (_type.toLowerCase().contains("sedlacka")) {
+      return "Sedlácká";
+    } else if (_type.toLowerCase().contains("verbunk")) {
+      return "Verbuňk";
+    } else {
+      return _type.toUpperCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,9 +63,11 @@ class DetailScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          title != null ? title : "Název",
-                          style: TextStyle(fontSize: 36.0, fontFamily: "Times"),
+                        Flexible(
+                          child: Text(
+                            title != null ? title : "Název",
+                            style: TextStyle(fontSize: 36.0, fontFamily: "Times"),
+                          ),
                         )
                       ],
                     ),
@@ -122,7 +134,7 @@ class DetailScreen extends StatelessWidget {
                                   TextStyle(fontSize: 12, color: Colors.grey),
                             ),
                             Text(
-                              type != null ? type : "Neuvedeno",
+                              type != null ? translateType(type) : "Neuvedeno",
                               style: TextStyle(fontSize: 12),
                             )
                           ],

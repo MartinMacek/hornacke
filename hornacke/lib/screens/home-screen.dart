@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:hornacke/components/custom-appbar.dart';
 import 'package:hornacke/components/song-card.dart';
@@ -14,17 +15,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   Future futureSongs;
+  List<Song> sedlacke;
+  List<Song> verbunky;
 
   List<Song> parseSongs(String responseBody) {
     final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
     return parsed.map<Song>((json) => Song.fromJson(json)).toList();
   }
+
   // sedlacke - https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=sedlacka
   // verbunky - https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=verbunk
 
   Future<List<Song>> fetchSongs() async {
     final response =
-        await http.get("https://hornacke.8u.cz/wp-json/wp/v2/songs");
+        await http.get("https://hornacke.8u.cz/wp-json/wp/v2/songs?per_page=15");
 
     if (response.statusCode == 200) {
       return parseSongs(response.body);
@@ -33,11 +37,39 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void fetchSedlacke() async {
+    final response = await http.get(
+        "https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=sedlacka&per_page=5");
+
+    if (response.statusCode == 200) {
+      setState(() {
+        sedlacke = parseSongs(response.body);
+      });
+    } else {
+      throw Exception('Failed to load sedlacke');
+    }
+  }
+
+  void fetchVerbunky() async {
+    final response = await http.get(
+        "https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=verbunk&per_page=5");
+
+    if (response.statusCode == 200) {
+      setState(() {
+        verbunky = parseSongs(response.body);
+      });
+    } else {
+      throw Exception('Failed to load verbunky');
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     futureSongs = fetchSongs();
+    fetchSedlacke();
+    fetchVerbunky();
   }
 
   @override
@@ -51,6 +83,13 @@ class _HomePageState extends State<HomePage> {
               borderRadius:
                   BorderRadius.only(bottomRight: Radius.circular(44.0)),
               color: Color(0xff191919),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black54,
+                  offset: Offset(0.0, 1.0), //(x,y)
+                  blurRadius: 3.0,
+                ),
+              ],
             ),
             child: Column(
               children: [
@@ -72,7 +111,7 @@ class _HomePageState extends State<HomePage> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 41.0),
                   child: Hero(
-                    tag: "search",
+                    tag: "none",
                     child: OutlineButton(
                         padding: const EdgeInsets.all(16),
                         shape: RoundedRectangleBorder(
@@ -105,26 +144,14 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 45,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      "Nejnovější písně",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 45,
-                ),
-                Row(
+          Column(
+            children: [
+              SizedBox(
+                height: 25,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Row(
                   children: [
                     Text(
                       "Sedlácké",
@@ -133,26 +160,93 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 45,
+              ),
+              if (sedlacke != null)
+                CarouselSlider(
+                  options: CarouselOptions(height: 115.0),
+                  items: sedlacke.map((i) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                            width: MediaQuery.of(context).size.width,
+                            margin: EdgeInsets.symmetric(horizontal: 5.0),
+                            decoration:
+                                BoxDecoration(color: Colors.transparent),
+                            child: SongCard(
+                              i.title,
+                              i.lyrics,
+                              i.type,
+                              sound: null,
+                              video: i.video,
+                              disableShadow: true,
+                            ));
+                      },
+                    );
+                  }).toList(),
                 ),
-                Row(
+              SizedBox(
+                height: 15,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Row(
                   children: [
                     Text(
-                      "Další...",
+                      "Verbuňky",
                       textAlign: TextAlign.start,
                       style: TextStyle(fontSize: 18.0),
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 17,
+              ),
+              if (verbunky != null)
+                CarouselSlider(
+                  options: CarouselOptions(height: 115.0),
+                  items: verbunky.map((i) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                            width: MediaQuery.of(context).size.width,
+                            margin: EdgeInsets.symmetric(horizontal: 5.0),
+                            decoration:
+                                BoxDecoration(color: Colors.transparent),
+                            child: SongCard(
+                              i.title,
+                              i.lyrics,
+                              i.type,
+                              sound: null,
+                              video: i.video,
+                              disableShadow: true,
+                            ));
+                      },
+                    );
+                  }).toList(),
                 ),
-                /*Column(
-                  children: List.generate(
-                      0, (i) => SongCard("The title", "lyrics", "sedlacka")),
-                ),*/
-                FutureBuilder(
+              SizedBox(
+                height: 25,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Nejnovější",
+                      textAlign: TextAlign.start,
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 17,
+              ),
+              /*Column(
+                children: List.generate(
+                    0, (i) => SongCard("The title", "lyrics", "sedlacka")),
+              ),*/
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                child: FutureBuilder(
                   future: futureSongs,
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
@@ -177,13 +271,11 @@ class _HomePageState extends State<HomePage> {
                     return CircularProgressIndicator();
                   },
                 ),
-              ],
-            ),
+              ),
+            ],
           )
         ],
       ),
     );
   }
 }
-
-

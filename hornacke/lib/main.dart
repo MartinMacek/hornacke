@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hornacke/screens/home-screen.dart';
+import 'package:hornacke/screens/search-screen.dart';
+import 'package:hornacke/screens/submit-screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,11 +13,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Horňácké',
-      theme: ThemeData(primarySwatch: Colors.grey, fontFamily: "Metropolis"),
+      theme: ThemeData(
+        primarySwatch: Colors.grey,
+        fontFamily: "Metropolis",
+        /*pageTransitionsTheme: PageTransitionsTheme(builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+        }),*/
+      ),
       initialRoute: "/",
       routes: {
-        // When navigating to the "/" route, build the FirstScreen widget.
         '/': (context) => HomePage(),
+        '/search': (context) => SearchPage(),
+        '/submit': (context) => SubmitPage(),
       },
     );
   }

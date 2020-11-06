@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:hornacke/components/debouncer.dart';
 import 'package:hornacke/components/detail-appbar.dart';
 import 'package:hornacke/components/search-result.dart';
 import 'package:hornacke/models/song-model.dart';
@@ -16,8 +17,11 @@ class _SearchPageState extends State<SearchPage> {
 
   List<Song> futureSongs;
   String _keyword;
+  bool searching = false;
 
   final _controller = TextEditingController();
+
+  final _debouncer = Debouncer(milliseconds: 1000);
 
   List<Song> parseSongs(String responseBody) {
     final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
@@ -25,19 +29,26 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void fetchSongs(String keyword) async {
+    print("new request");
     setState(() {
       futureSongs = null;
+      searching = true;
     });
 
     if (keyword == null || keyword.length < 3) {
       setState(() {
         _keyword = null;
+        searching = false;
       });
       return;
     }
 
     final response = await http.get(
-        "https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=lyrics&filter[meta_compare]=LIKE&filter[meta_value]=$keyword");
+        "https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=lyrics&filter[meta_compare]=LIKE&filter[meta_value]=$keyword&per_page=10");
+
+    setState(() {
+      searching = false;
+    });
 
     print(response.statusCode);
     if (response.statusCode == 200) {
@@ -45,7 +56,6 @@ class _SearchPageState extends State<SearchPage> {
         _keyword = keyword;
         futureSongs = parseSongs(response.body);
       });
-      //return parseSongs(response.body);
     } else {
       throw Exception('Failed to load songs');
     }
@@ -75,7 +85,10 @@ class _SearchPageState extends State<SearchPage> {
                     autofocus: true,
                     controller: _controller,
                     onSubmitted: (val) {
-                      fetchSongs(val);
+                      _debouncer.run(() => fetchSongs(val));
+                    },
+                    onChanged: (val) {
+                      _debouncer.run(() => fetchSongs(val));
                     },
                     decoration: InputDecoration(
                         focusedBorder: OutlineInputBorder(
@@ -90,7 +103,7 @@ class _SearchPageState extends State<SearchPage> {
                         suffixIcon: IconButton(
                           icon: Icon(Icons.search_outlined),
                           onPressed: () {
-                            fetchSongs(_controller.text);
+                            _debouncer.run(() => fetchSongs(_controller.text));
                           },
                         )),
                   ),
@@ -107,20 +120,24 @@ class _SearchPageState extends State<SearchPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
-                      children: [
-                        Column(
-                          children: futureSongs
-                              .map((val) =>
-                                  SearchResult(val.title, val.lyrics, _keyword))
-                              .toList(),
-                        )
-                      ],
+                      children: futureSongs
+                          .map((val) => SearchResult(
+                                val.title,
+                                val.lyrics,
+                                _keyword,
+                                video: val.video,
+                                sound: null,
+                                type: val.type,
+                              ))
+                          .toList(),
                     ),
                   ),
                 ),
               )
+            else if (searching && futureSongs == null)
+              CircularProgressIndicator.adaptive()
             else if (_keyword != null && _keyword.isNotEmpty)
-              Text("Žádný výsledek")
+              Text("Žádný výsledek"),
           ],
         ),
       ),

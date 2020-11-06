@@ -27,6 +27,7 @@ dependencies:
   http: ^0.12.2
   flutter_html: ^1.0.0
   video_player: ^0.10.10
+  carousel_slider: ^2.3.1
 
 
   # The following adds the Cupertino Icons font to your application.
