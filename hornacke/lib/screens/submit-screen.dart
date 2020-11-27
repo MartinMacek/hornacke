@@ -8,6 +8,8 @@ class SubmitPage extends StatefulWidget {
 }
 
 class _SubmitPageState extends State<SubmitPage> {
+  String _value;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,14 +97,39 @@ class _SubmitPageState extends State<SubmitPage> {
                   width: 10,
                 ),
                 Expanded(
-                  child: TextField(
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey)),
-                          hintText: 'select',
-                          labelText: 'Typ *',
-                          labelStyle: TextStyle(
-                              fontFamily: "Times", color: Colors.black))),
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        left: 10.0, right: 10.0, top: 3, bottom: 3),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(color: Colors.grey)),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                          value: _value,
+                          icon: Icon(Icons.keyboard_arrow_down),
+                          hint: Text("Typ *",
+                              style: TextStyle(fontFamily: "Times")),
+                          items: [
+                            DropdownMenuItem(
+                              child: Text("Sedlácká",
+                                  style: TextStyle(fontFamily: "Times")),
+                              value: "SEDLACKA",
+                            ),
+                            DropdownMenuItem(
+                              child: Text(
+                                "Verbuňk",
+                                style: TextStyle(fontFamily: "Times"),
+                              ),
+                              value: "VERBUNK",
+                            ),
+                          ],
+                          onChanged: (value) {
+                            setState(() {
+                              _value = value;
+                            });
+                          }),
+                    ),
+                  ),
                 ),
                 SizedBox(
                   width: 10,
@@ -155,12 +182,33 @@ class _SubmitPageState extends State<SubmitPage> {
                     labelStyle:
                         TextStyle(fontFamily: "Times", color: Colors.black))),
             SizedBox(
+              height: 20,
+            ),
+            TextField(
+                minLines: 2,
+                maxLines: 5,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey)),
+                    hintText:
+                        'Zajímavost, jiná verze, okolnosti, historie, doplňující informace...',
+                    labelText: 'Doplňující komentář',
+                    labelStyle:
+                        TextStyle(fontFamily: "Times", color: Colors.black))),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              "Pole s * jsou povinné",
+              style: TextStyle(color: Colors.black, fontFamily: "Times"),
+            ),
+            SizedBox(
               height: 40,
             ),
             MaterialButton(
                 height: 56,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4.0),
+                  borderRadius: BorderRadius.circular(4.0),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
