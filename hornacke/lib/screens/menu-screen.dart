@@ -37,7 +37,7 @@ class MenuScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                   Navigator.of(context).pushNamed("/search");
                 },
               ),
@@ -47,7 +47,7 @@ class MenuScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                   Navigator.of(context).pushNamed("/submit");
                 },
               ),
@@ -56,7 +56,18 @@ class MenuScreen extends StatelessWidget {
                   "Navrhnout úpravu",
                   style: TextStyle(fontSize: 18),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              TextButton(
+                child: Text(
+                  "O aplikaci",
+                  style: TextStyle(fontSize: 18),
+                ),
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
               ),
             ],
           ),

@@ -135,7 +135,7 @@ class _SearchPageState extends State<SearchPage> {
                 ),
               )
             else if (searching && futureSongs == null)
-              CircularProgressIndicator.adaptive()
+              CircularProgressIndicator()
             else if (_keyword != null && _keyword.isNotEmpty)
               Text("Žádný výsledek"),
           ],
