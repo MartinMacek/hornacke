@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   Future futureSongs;
   List<Song> sedlacke;
   List<Song> verbunky;
+  bool internetAvailable = true;
 
   List<Song> parseSongs(String responseBody) {
     final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
@@ -27,8 +29,8 @@ class _HomePageState extends State<HomePage> {
   // verbunky - https://hornacke.8u.cz/wp-json/wp/v2/songs?filter[meta_key]=song_type&filter[meta_value]=verbunk
 
   Future<List<Song>> fetchSongs() async {
-    final response =
-        await http.get("https://hornacke.8u.cz/wp-json/wp/v2/songs?per_page=15");
+    final response = await http
+        .get("https://hornacke.8u.cz/wp-json/wp/v2/songs?per_page=15");
 
     if (response.statusCode == 200) {
       return parseSongs(response.body);
@@ -70,6 +72,23 @@ class _HomePageState extends State<HomePage> {
     futureSongs = fetchSongs();
     fetchSedlacke();
     fetchVerbunky();
+  }
+
+  void checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup("hornacke.cz");
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print("connected");
+        setState(() {
+          internetAvailable = true;
+        });
+      }
+    } on SocketException catch (_) {
+      print("not connected");
+      setState(() {
+        internetAvailable = false;
+      });
+    }
   }
 
   @override
@@ -149,18 +168,19 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: 25,
               ),
-              Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "Sedlácké",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                  ],
+              if (sedlacke != null)
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Sedlácké",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               if (sedlacke != null)
                 CarouselSlider(
                   options: CarouselOptions(height: 115.0),
@@ -187,18 +207,19 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: 15,
               ),
-              Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "Verbuňky",
-                      textAlign: TextAlign.start,
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                  ],
+              if (verbunky != null)
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Verbuňky",
+                        textAlign: TextAlign.start,
+                        style: TextStyle(fontSize: 18.0),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
               if (verbunky != null)
                 CarouselSlider(
                   options: CarouselOptions(height: 115.0),
@@ -265,7 +286,7 @@ class _HomePageState extends State<HomePage> {
                             );
                           });
                     } else if (snapshot.hasError) {
-                      return Text("err: ${snapshot.error}");
+                      return Text("Nelze načíst data ze serveru");
                     }
                     // By default, show a loading spinner.
                     return CircularProgressIndicator();

@@ -1,6 +1,8 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:hornacke/components/detail-appbar.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 
 class SubmitPage extends StatefulWidget {
   @override
@@ -8,7 +10,84 @@ class SubmitPage extends StatefulWidget {
 }
 
 class _SubmitPageState extends State<SubmitPage> {
-  String _value;
+  String _songType;
+  String _errMessage = "";
+  bool sending = false;
+
+  TextEditingController titleController = TextEditingController();
+  TextEditingController originController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
+  TextEditingController authorController = TextEditingController();
+  TextEditingController textController = TextEditingController();
+  TextEditingController linkController = TextEditingController();
+  TextEditingController commentController = TextEditingController();
+
+  final smtpServer = new SmtpServer('smtp.seznam.cz',
+      username: 'hornacke@seznam.cz',
+      password: 'Xhornacke12',
+      port: 465,
+      allowInsecure: true);
+
+  Future<bool> validation() async {
+    if (titleController.text.isEmpty) {
+      setState(() {
+        _errMessage = "Prosím vyplněte Název písně";
+      });
+      return false;
+    } else if (_songType == null) {
+      setState(() {
+        _errMessage = "Prosím vyberte Typ písně";
+      });
+      return false;
+    } else if (textController.text.isEmpty) {
+      setState(() {
+        _errMessage = "Prosím vyplněte Text písně";
+      });
+      return false;
+    }
+    setState(() {
+      _errMessage = "";
+    });
+    return true;
+  }
+
+  void submitNewSong() async {
+    if (await validation() == false) {
+      return;
+    }
+    setState(() {
+      sending = true;
+    });
+    final message = Message()
+      ..from = Address('hornacke@seznam.cz', 'Hornacke')
+      ..recipients.add('martin.m53@seznam.cz')
+      ..subject =
+          'Test Dart Mailer library :: 😀 :: ${DateTime.now().toLocal()}'
+      ..text = 'Title: ${titleController.text}\n'
+          'Origin: ${originController.text}\n'
+          'Type: ${_songType}\n\n'
+          'Date: ${dateController.text}\n\n'
+          'Author: ${authorController.text}\n\n'
+          'Text: ${textController.text}\n\n'
+          'Link: ${linkController.text}\n\n'
+          'Comment: ${commentController.text}\n';
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+      setState(() {
+        sending = false;
+      });
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      print.toString();
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+      setState(() {
+        sending = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +133,7 @@ class _SubmitPageState extends State<SubmitPage> {
                         children: [
                           Text(
                             "Je to snadné. Stačí co nejlépe vyplnit informace o písničce kterou chcete přidat a stisknout tlačítko odeslat. \n"
-                            "Veškeré příspěvky jsou schvalovány ručně pro zachování celistvosti, předcházení chybám nebo duplicitním příspěvkům. "
+                            "Veškeré příspěvky jsou schvalovány ručně pro zachování ucelenosti, předcházení chybám nebo duplicitním příspěvkům. "
                             "Přidání proto může trvat, může být lehce poupraveno či se do databáze nedostat vůbec. "
                             "Nenechte se tím však odradit! \nZa každý příspěvek jsem velmi rád a předem Vám velmi děkuji, že jste ochotni rozšiřovat tuto digitální sbírku :)",
                             softWrap: true,
@@ -71,6 +150,7 @@ class _SubmitPageState extends State<SubmitPage> {
               height: 40,
             ),
             TextField(
+                controller: titleController,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey)),
@@ -82,9 +162,11 @@ class _SubmitPageState extends State<SubmitPage> {
               height: 20,
             ),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
                   child: TextField(
+                      controller: originController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
@@ -105,16 +187,11 @@ class _SubmitPageState extends State<SubmitPage> {
                         border: Border.all(color: Colors.grey)),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton(
-                          value: _value,
+                          value: _songType,
                           icon: Icon(Icons.keyboard_arrow_down),
                           hint: Text("Typ *",
                               style: TextStyle(fontFamily: "Times")),
                           items: [
-                            DropdownMenuItem(
-                              child: Text("Sedlácká",
-                                  style: TextStyle(fontFamily: "Times")),
-                              value: "SEDLACKA",
-                            ),
                             DropdownMenuItem(
                               child: Text(
                                 "Verbuňk",
@@ -122,10 +199,30 @@ class _SubmitPageState extends State<SubmitPage> {
                               ),
                               value: "VERBUNK",
                             ),
+                            DropdownMenuItem(
+                              child: Text("Sedlácká",
+                                  style: TextStyle(fontFamily: "Times")),
+                              value: "SEDLACKA",
+                            ),
+                            DropdownMenuItem(
+                              child: Text("Táhlá",
+                                  style: TextStyle(fontFamily: "Times")),
+                              value: "SEDLACKA-TAHLA",
+                            ),
+                            DropdownMenuItem(
+                              child: Text("Milostná",
+                                  style: TextStyle(fontFamily: "Times")),
+                              value: "SEDLACKA-MILOSTNA",
+                            ),
+                            DropdownMenuItem(
+                              child: Text("Vojenská",
+                                  style: TextStyle(fontFamily: "Times")),
+                              value: "SEDLACKA-VOJENSKA",
+                            ),
                           ],
                           onChanged: (value) {
                             setState(() {
-                              _value = value;
+                              _songType = value;
                             });
                           }),
                     ),
@@ -136,6 +233,7 @@ class _SubmitPageState extends State<SubmitPage> {
                 ),
                 Expanded(
                   child: TextField(
+                      controller: dateController,
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.grey)),
@@ -150,6 +248,7 @@ class _SubmitPageState extends State<SubmitPage> {
               height: 20,
             ),
             TextField(
+                controller: authorController,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey)),
@@ -161,6 +260,7 @@ class _SubmitPageState extends State<SubmitPage> {
               height: 20,
             ),
             TextField(
+                controller: textController,
                 minLines: 5,
                 maxLines: 10,
                 decoration: InputDecoration(
@@ -176,7 +276,10 @@ class _SubmitPageState extends State<SubmitPage> {
             TextField(
                 decoration: InputDecoration(
                     border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey)),
+                      borderSide: BorderSide(
+                        color: Colors.red,
+                      ),
+                    ),
                     hintText: 'např. https://youtu.be/djV11Xbc914...',
                     labelText: 'Odkaz na youtube video',
                     labelStyle:
@@ -185,6 +288,7 @@ class _SubmitPageState extends State<SubmitPage> {
               height: 20,
             ),
             TextField(
+                controller: commentController,
                 minLines: 2,
                 maxLines: 5,
                 decoration: InputDecoration(
@@ -203,7 +307,14 @@ class _SubmitPageState extends State<SubmitPage> {
               style: TextStyle(color: Colors.black, fontFamily: "Times"),
             ),
             SizedBox(
-              height: 40,
+              height: 20,
+            ),
+            Text(
+              _errMessage.toString(),
+              style: TextStyle(color: Colors.red, fontFamily: "Times"),
+            ),
+            SizedBox(
+              height: 20,
             ),
             MaterialButton(
                 height: 56,
@@ -213,17 +324,22 @@ class _SubmitPageState extends State<SubmitPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      "Odeslat",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontFamily: "Times"),
-                    ),
+                    !sending
+                        ? Text(
+                            "Odeslat",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontFamily: "Times"),
+                          )
+                        : Container(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator())
                   ],
                 ),
                 color: Color(0xff191919),
-                onPressed: () {}),
+                onPressed: sending ? null : submitNewSong),
             SizedBox(
               height: 50,
             ),

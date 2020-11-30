@@ -58,6 +58,7 @@ class MenuScreen extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.of(context).pushNamed("/feedback");
                 },
               ),
               TextButton(
@@ -67,6 +68,7 @@ class MenuScreen extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.of(context).pushNamed("/about");
                 },
               ),
             ],

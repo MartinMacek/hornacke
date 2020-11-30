@@ -29,6 +29,7 @@ dependencies:
   video_player: ^0.10.10
   carousel_slider: ^2.3.1
   expandable: ^4.1.4
+  mailer: ^3.2.1
 
 
   # The following adds the Cupertino Icons font to your application.

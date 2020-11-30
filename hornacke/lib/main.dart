@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hornacke/screens/about-screen.dart';
+import 'package:hornacke/screens/feedback-screen.dart';
 import 'package:hornacke/screens/home-screen.dart';
 import 'package:hornacke/screens/search-screen.dart';
 import 'package:hornacke/screens/submit-screen.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomePage(),
         '/search': (context) => SearchPage(),
         '/submit': (context) => SubmitPage(),
+        "/about": (context) => AboutPage(),
+        "/feedback": (context) => FeedbackPage()
       },
     );
   }
